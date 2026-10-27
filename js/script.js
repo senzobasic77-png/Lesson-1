@@ -1,25 +1,32 @@
-// Mobile menu
-const menuBtn = document.getElementById('menuBtn');
-const nav = document.getElementById('nav');
-menuBtn.addEventListener('click', () => {
-  const open = nav.classList.toggle('open');
-  menuBtn.setAttribute('aria-expanded', open);
-});
-nav.addEventListener('click', e => { if (e.target.tagName === 'A') nav.classList.remove('open'); });
-
-// Theme toggle (remembers the choice in the browser)
-const themeBtn = document.getElementById('themeBtn');
-function setTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
-  themeBtn.textContent = theme === 'dark' ? 'Light mode' : 'Dark mode';
-  try { localStorage.setItem('theme', theme); } catch (e) {}
-}
-let saved = null;
-try { saved = localStorage.getItem('theme'); } catch (e) {}
-setTheme(saved || 'light');
-themeBtn.addEventListener('click', () => {
-  setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+// Menu filter buttons
+const buttons = document.querySelectorAll('.filter');
+const items = document.querySelectorAll('.item');
+buttons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    buttons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const choice = btn.dataset.filter;
+    items.forEach(item => {
+      item.classList.toggle('hide', choice !== 'all' && item.dataset.cat !== choice);
+    });
+  });
 });
 
-// Footer year
+// Booking form check (stops the form if something is missing)
+const form = document.getElementById('bookForm');
+const error = document.getElementById('formError');
+form.addEventListener('submit', e => {
+  const date = form.elements['date'].value;
+  const today = new Date().toISOString().split('T')[0];
+  if (!form.elements['name'].value.trim() || !form.elements['email'].value.includes('@')) {
+    e.preventDefault();
+    error.textContent = 'Please enter your name and a valid email address.';
+  } else if (!date || date < today) {
+    e.preventDefault();
+    error.textContent = 'Please choose today or a future date.';
+  } else {
+    error.textContent = '';
+  }
+});
+
 document.getElementById('year').textContent = new Date().getFullYear();
